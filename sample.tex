@@ -1,0 +1,177 @@
+\documentclass[11pt,a4paper]{article}
+
+% Encodage et polices
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% Mise en page
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+% Mathématiques avancées
+\usepackage{amsmath,amssymb,amsfonts}
+
+% Graphiques et tableaux
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+
+% Liens hypertextes
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue
+}
+
+% Texte barré et souligné
+\usepackage[normalem]{ulem}
+
+% Blocs de code
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{codecomment}{rgb}{0.25,0.5,0.35}
+\definecolor{codekeyword}{rgb}{0.13,0.13,1}
+\definecolor{codestring}{rgb}{0.8,0.1,0.1}
+
+\lstdefinestyle{moderncode}{
+    backgroundcolor=\color{codebg},
+    commentstyle=\color{codecomment}\textit,
+    keywordstyle=\color{codekeyword}\textbf,
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{codestring},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{black!20},
+    literate=
+      {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+      {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+      {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+      {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+      {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+      {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+      {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+      {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+      {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ç}{{\c c}}1
+      {Ç}{{\c C}}1 {«}{{\guillemotleft}}1 {»}{{\guillemotright}}1
+}
+\lstset{style=moderncode}
+
+\title{Rapport de Démonstration : Conversion Markdown vers LaTeX}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\vspace{1em}
+
+
+Bienvenue dans ce document d'exemple pour le projet \textbf{md2tex}.
+
+\subsection{1. Formatage de texte et caractères spéciaux}
+
+On peut mettre du texte en \textbf{gras}, en \textit{italique}, en \textbf{\textit{gras et italique}}, ou encore en \sout{texte barré}.
+Les caractères spéciaux comme 100\%, les esperluettes \& cie, ainsi que les variables avec underscores comme \texttt{taux\_variation\_annuel} sont convenablement échappés pour éviter les erreurs de compilation LaTeX.
+
+\subsection{2. Formules Mathématiques}
+
+\subsubsection{Formule en ligne}
+Le théorème de Pythagore s'énonce $a^2 + b^2 = c^2$.
+La célèbre équation d'Einstein est $E = m \cdot c^2$.
+Pour une variable aléatoire $X \sim \mathcal{N}(\mu, \sigma^2)$, la densité est donnée par $f(x)$.
+
+\subsubsection{Formule en bloc}
+Voici l'intégrale de Gauss :
+
+\begin{equation*}
+\int_{-\infty}^{+\infty} e^{-x^2} dx = \sqrt{\pi}
+\end{equation*}
+
+Et la formule de décomposition en série de Fourier :
+
+\begin{equation*}
+f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left( a_n \cos(nx) + b_n \sin(nx) \right)
+\end{equation*}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsection{3. Listes}
+
+\subsubsection{Liste non ordonnée}
+\begin{itemize}
+  \item Premier élément important
+  \item Deuxième élément avec une sous-liste :
+\begin{itemize}
+  \item Sous-élément A
+  \item Sous-élément B avec formule : $x_k \in \mathbb{R}$
+\end{itemize}
+  \item Troisième élément
+\end{itemize}
+
+\subsubsection{Liste ordonnée}
+\begin{enumerate}
+  \item Étape 1 : Initialisation des variables
+  \item Étape 2 : Traitement algorithmique
+  \item Étape 3 : Exportation des résultats
+\end{enumerate}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsection{4. Blocs de Code}
+
+Voici un extrait de code Python avec coloration syntaxique :
+
+\begin{lstlisting}[language=python]
+def fibonacci(n: int) -> list[int]:
+    """Génère la suite de Fibonacci jusqu'à n termes."""
+    sequence = [0, 1]
+    while len(sequence) < n:
+        sequence.append(sequence[-1] + sequence[-2])
+    return sequence[:n]
+
+if __name__ == "__main__":
+    print(fibonacci(10))
+\end{lstlisting}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsection{5. Tableaux}
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|l|c|r|c|}
+\hline
+\textbf{Nom de l'algorithme} & \textbf{Complexité temporelle} & \textbf{Complexité spatiale} & \textbf{Type} \\ \hline
+Tri Rapide (QuickSort) & $\mathcal{O}(n \log n)$ & $\mathcal{O}(\log n)$ & Diviser pour régner \\ \hline
+Tri par Fusion (MergeSort) & $\mathcal{O}(n \log n)$ & $\mathcal{O}(n)$ & Stable \\ \hline
+Tri à Bulles (BubbleSort) & $\mathcal{O}(n^2)$ & $\mathcal{O}(1)$ & Naïf \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsection{6. Citations et Liens}
+
+\begin{quote}
+La science est ce que l'on comprend bien assez pour l'expliquer à un ordinateur. L'art est tout le reste. — Donald Knuth
+\end{quote}
+
+Pour en savoir plus, consultez la documentation officielle de \href{https://www.latex-project.org}{LaTeX Project} ou le dépôt du projet.
+
+\end{document}
