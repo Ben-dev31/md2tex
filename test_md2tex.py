@@ -3,7 +3,12 @@ Tests unitaires pour le convertisseur Markdown vers LaTeX (md2tex)
 """
 
 import unittest
+import os
+import sys
+import tempfile
+from unittest.mock import patch
 from parser import MarkdownToLatex, find_title, extract_title
+import md2tex
 from md2tex import convert_markdown_to_latex
 
 
@@ -106,6 +111,46 @@ class TestMarkdownToLatex(unittest.TestCase):
         self.assertIn(r"\maketitle", tex)
         self.assertIn(r"\begin{document}", tex)
         self.assertIn(r"\end{document}", tex)
+
+    def test_pdf_output_uses_standalone_tex_and_input_directory(self):
+        with tempfile.TemporaryDirectory() as input_dir:
+            input_path = os.path.join(input_dir, "sample.md")
+            with open(input_path, "w", encoding="utf-8") as markdown_file:
+                markdown_file.write("# Titre\nContenu.")
+
+            def compile_pdf(command, check):
+                self.assertEqual(command[0], "pdflatex")
+                self.assertEqual(command[1], "-interaction=nonstopmode")
+                self.assertEqual(command[2], "-output-directory")
+                self.assertEqual(os.path.basename(command[-1]), "sample_temp.tex")
+                self.assertTrue(check)
+                temp_dir = command[3]
+                self.assertEqual(os.path.dirname(command[-1]), temp_dir)
+                with open(command[-1], encoding="utf-8") as tex_file:
+                    self.assertIn(r"\documentclass", tex_file.read())
+                with open(os.path.join(temp_dir, "sample_temp.pdf"), "wb") as pdf_file:
+                    pdf_file.write(b"PDF")
+
+            with patch.object(sys, "argv", ["md2tex.py", "--input", input_path, "-o", "pdf"]):
+                with patch.object(md2tex.shutil, "which", return_value="pdflatex"):
+                    with patch.object(md2tex.subprocess, "run", side_effect=compile_pdf):
+                        md2tex.main()
+
+            self.assertTrue(os.path.isfile(os.path.join(input_dir, "sample.pdf")))
+            self.assertTrue(os.path.isfile(os.path.join(input_dir, "sample.tex")))
+
+    def test_pdf_output_reports_missing_pdflatex(self):
+        with tempfile.TemporaryDirectory() as input_dir:
+            input_path = os.path.join(input_dir, "sample.md")
+            with open(input_path, "w", encoding="utf-8") as markdown_file:
+                markdown_file.write("# Titre")
+
+            with patch.object(sys, "argv", ["md2tex.py", "--input", input_path, "-o", "pdf"]):
+                with patch.object(md2tex.shutil, "which", return_value=None):
+                    with self.assertRaises(SystemExit) as error:
+                        md2tex.main()
+
+            self.assertEqual(error.exception.code, 1)
 
 
 if __name__ == '__main__':

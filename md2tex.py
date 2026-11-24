@@ -6,11 +6,15 @@ Usage en ligne de commande ou comme module Python.
 
 import sys
 import os
+import shutil
+import tempfile
 import argparse
-import re
-from datetime import datetime
-from parser import MarkdownToLatex, find_title, extract_title
+from parser import MarkdownToLatex, extract_title
+import subprocess
+import logging
+import traceback
 
+logging.basicConfig(level=logging.INFO)
 
 LATEX_DOCUMENT_TEMPLATE = r"""\documentclass[11pt,a4paper]{article}
 
@@ -224,12 +228,13 @@ def main():
     )
     parser.add_argument(
         "-o", "--output",
-        default=None,
-        help="Chemin du fichier LaTeX de sortie (.tex). Par défaut: <nom_du_fichier>.tex"
+        default='tex',
+        help="type de sortie (.tex, .pdf). Par défaut: <nom_du_fichier>.tex"
     )
     parser.add_argument(
         "-s", "--standalone",
         action="store_true",
+        default=False,
         help="Génère un document LaTeX complet et autonome avec préambule et paquetages requis."
     )
     parser.add_argument(
@@ -255,6 +260,7 @@ def main():
     parser.add_argument(
         "--no-numbering",
         action="store_true",
+        default=False,
         help="Désactive la numérotation des sections (\\section* au lieu de \\section)."
     )
 
@@ -262,29 +268,72 @@ def main():
 
     input_file = args.input
     if not os.path.isfile(input_file):
-        print(f"Erreur : Le fichier '{input_file}' n'existe pas.", file=sys.stderr)
+        logging.error(f"Erreur : Le fichier '{input_file}' n'existe pas.")
         sys.exit(1)
 
-    output_file = args.output
-    if not output_file:
-        base, _ = os.path.splitext(input_file)
-        output_file = base + ".tex"
+    base, _ = os.path.splitext(input_file)
+    output_tex_file = base + ".tex"
+
+    output_type = args.output
 
     try:
-        convert_file(
-            input_path=input_file,
-            output_path=output_file,
-            standalone=args.standalone,
-            title=args.title,
-            author=args.author,
-            date=args.date,
-            language=args.lang,
-            numbered=not args.no_numbering
-        )
-        mode_str = "document autonome" if args.standalone else "fragment"
-        print(f"Succès : '{input_file}' a été converti en '{output_file}' ({mode_str}).")
+        if output_type == 'pdf':
+            pdflatex = shutil.which("pdflatex")
+            if pdflatex is None:
+                logging.error(
+                    "Impossible de générer le PDF : 'pdflatex' est introuvable. "
+                    "Installez MiKTeX ou TeX Live et ajoutez pdflatex au PATH."
+                )
+                sys.exit(1)
+
+            tex_name = os.path.basename(base) + "_temp.tex"
+            logging.info(f"Conversion en LaTeX ({tex_name})...")
+            with tempfile.TemporaryDirectory(prefix="md2tex_") as temp_dir:
+                temp_tex_file = os.path.join(temp_dir, tex_name)
+                convert_file(
+                    input_path=input_file,
+                    output_path=temp_tex_file,
+                    standalone=True,
+                    title=args.title,
+                    author=args.author,
+                    date=args.date,
+                    language=args.lang,
+                    numbered=not args.no_numbering
+                )
+
+                logging.info(f"Compilation en PDF ({tex_name})...")
+                subprocess.run(
+                    [
+                        pdflatex,
+                        "-interaction=nonstopmode",
+                        "-output-directory",
+                        temp_dir,
+                        temp_tex_file
+                    ],
+                    check=True
+                )
+
+                generated_pdf = os.path.join(temp_dir, os.path.splitext(tex_name)[0] + ".pdf")
+                shutil.move(generated_pdf, base + ".pdf")
+                shutil.move(temp_tex_file, output_tex_file)
+            output_file = base + ".pdf"
+        else:
+            convert_file(
+                input_path=input_file,
+                output_path=output_tex_file,
+                standalone=args.standalone,
+                title=args.title,
+                author=args.author,
+                date=args.date,
+                language=args.lang,
+                numbered=not args.no_numbering
+            )
+            output_file = output_tex_file
+        mode_str = "document autonome" if args.standalone or output_type == 'pdf' else "fragment"
+        logging.info(f"Succès : '{input_file}' a été converti en '{output_file}' ({mode_str}).")
     except Exception as e:
-        print(f"Erreur lors de la conversion : {e}", file=sys.stderr)
+        logging.error(f"Erreur lors de la conversion : {e}")
+        traceback.print_exc()
         sys.exit(1)
 
 

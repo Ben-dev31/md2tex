@@ -32,10 +32,10 @@ Ce programme convertit vos documents Markdown en documents LaTeX prêts à être
 
 ## Structure du projet
 
-- [`parser.py`](file:///c:/Users/btchitche/Desktop/WorkSapce/Projets/md2tex/parser.py) : Moteur de parsing et conversion Markdown $\rightarrow$ LaTeX.
-- [`md2tex.py`](file:///c:/Users/btchitche/Desktop/WorkSapce/Projets/md2tex/md2tex.py) : Interface en ligne de commande (CLI) et générateur de documents complets.
-- [`test_md2tex.py`](file:///c:/Users/btchitche/Desktop/WorkSapce/Projets/md2tex/test_md2tex.py) : Suite de tests unitaires.
-- [`sample.md`](file:///c:/Users/btchitche/Desktop/WorkSapce/Projets/md2tex/sample.md) : Fichier Markdown d'exemple illustrant l'ensemble des fonctionnalités.
+- [`parser.py`] : Moteur de parsing et conversion Markdown $\rightarrow$ LaTeX.
+- [`md2tex.py`] : Interface en ligne de commande (CLI) et générateur de documents complets.
+- [`test_md2tex.py`] : Suite de tests unitaires.
+- [`sample.md`] : Fichier Markdown d'exemple illustrant l'ensemble des fonctionnalités.
 
 ---
 
@@ -53,13 +53,20 @@ python md2tex.py document.md -o document.tex
 python md2tex.py sample.md -s -o document.tex --author "Votre Nom" --title "Mon Titre"
 ```
 
+#### Conversion en PDF :
+```bash
+python md2tex.py --input sample.md -o pdf
+```
+
+La conversion PDF nécessite une distribution LaTeX (MiKTeX ou TeX Live) avec `pdflatex` accessible depuis le `PATH`.
+
 Si `--title` n'est pas fourni, le programme extrait automatiquement le premier titre `# Titre` trouvé dans le document Markdown.
 
 #### Options disponibles :
 | Option | Raccourci | Description |
 | :--- | :---: | :--- |
-| `input` | | Fichier Markdown `.md` d'entrée |
-| `--output` | `-o` | Fichier `.tex` de sortie (défaut : `<nom>.tex`) |
+| `--input` | | Fichier Markdown `.md` d'entrée |
+| `--output` | `-o` | Type de sortie `tex, pdf` (défaut : `tex`) |
 | `--standalone` | `-s` | Génère un document LaTeX complet avec préambule |
 | `--title` | `-t` | Titre du document |
 | `--author` | `-a` | Nom de l'auteur |
