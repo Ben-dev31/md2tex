@@ -5,7 +5,7 @@ Usage en ligne de commande ou comme module Python.
 """
 
 import sys
-import os
+import os, pathlib
 import shutil
 import tempfile
 import argparse
@@ -216,6 +216,49 @@ def convert_file(
             f.write(latex_code)
 
     return latex_code
+
+
+class Converter :
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs 
+        self.template = None 
+        self.mdfile_name = kwargs.get("input_file")
+        self.file_ext = pathlib.Path(self.mdfile_name).name.split('.')[-1]
+        self.base = pathlib.Path(self.mdfile_name).parent
+        self.output_file_name = kwargs.get('output_file', pathlib.Path(self.mdfile_name).name.removesuffix(self.file_ext)) 
+    
+    def convert_to_tex(self, temp_dir = None):
+        logging.info(f"Conversion en LaTeX...")
+        temp_tex_file = os.path.join(temp_dir, pathlib.Path(self.mdfile_name).name.replace(self.file_ext,'.tex'))
+        convert_file(
+            input_path=self.mdfile_name,
+            output_path=temp_tex_file,
+            standalone=True,
+            title=self.kwargs.get('title', None),
+            author=self.kwargs.get('author', None),
+            date=self.kwargs.get('data', None),
+            language=self.kwargs.get('lang', None),
+            numbered=not argsself.kwargs.get('no_numbering', None)
+        )
+
+        return temp_tex_file
+
+    def conver_to_pdf(self, temp_dir, temp_tex_file):
+        logging.info(f"Compilation en PDF...")
+        subprocess.run(
+            [
+                pdflatex,
+                "-interaction=nonstopmode",
+                "-output-directory",
+                temp_dir,
+                temp_tex_file
+            ],
+            check=True
+        ) 
+    
+    def run(self, mode='tex'):
+        if mode == 'tex':
+            self.convert_to_tex()
 
 
 def main():
